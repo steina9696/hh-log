@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Honey House Log</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f3;
+      --text: #1a1a1a;
+      --text-secondary: #6b6b68;
+      --border: rgba(0,0,0,0.12);
+      --border-med: rgba(0,0,0,0.22);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1c;
+        --bg-secondary: #2a2a2a;
+        --text: #f0f0ee;
+        --text-secondary: #a0a09c;
+        --border: rgba(255,255,255,0.12);
+        --border-med: rgba(255,255,255,0.22);
+      }
+    }
+
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .form-wrap { max-width: 480px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+
+    .form-header { margin-bottom: 1.75rem; }
+    .form-header h1 { font-size: 20px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .form-header p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+    .field { margin-bottom: 1.25rem; }
+    .field label, .card-field label {
+      display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    input[type="date"], input[type="number"], select, textarea {
+      width: 100%; background: var(--bg); color: var(--text);
+      border: 0.5px solid var(--border-med); border-radius: var(--radius-md);
+      padding: 12px 14px; font-size: 16px; font-family: var(--font);
+      appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--text-secondary); }
+    textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b68' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+    }
+
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.5rem 0; }
+
+    .person-card { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+    .person-card input[type="number"], .person-card textarea { background: var(--bg); }
+    .person-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 7px; }
+    .person-name i { font-size: 16px; color: var(--text-secondary); }
+    .card-field { margin-bottom: 1rem; }
+    .card-field:last-child { margin-bottom: 0; }
+
+    .submit-btn {
+      width: 100%; padding: 16px; background: var(--text); color: var(--bg);
+      border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 500;
+      cursor: pointer; margin-top: 0.5rem; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .submit-btn:disabled { opacity: 0.5; }
+
+    .spinner {
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--bg);
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-banner {
+      margin-top: 0.75rem; padding: 10px 14px;
+      border-radius: var(--radius-md); font-size: 13px; text-align: center;
+      display: none;
+    }
+    .status-banner.error { background: #fff0f0; border: 0.5px solid #f0c0c0; color: #c0392b; display: block; }
+    .status-banner.info { background: #f0f4ff; border: 0.5px solid #c0ccf0; color: #2c3e8c; display: block; }
+    @media (prefers-color-scheme: dark) {
+      .status-banner.error { background: #2a1a1a; border-color: #5a2a2a; color: #f08080; }
+      .status-banner.info { background: #1a1a2a; border-color: #2a2a5a; color: #a0a0f0; }
+    }
+
+    .success-msg { display: none; text-align: center; padding: 3rem 1rem; }
+    .success-msg h2 { font-size: 18px; font-weight: 500; margin: 0.75rem 0 0.5rem; color: var(--text); }
+    .success-msg p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    .another-btn {
+      margin-top: 1.5rem; background: transparent; border: 0.5px solid var(--border-med);
+      border-radius: var(--radius-md); padding: 12px 28px; font-size: 15px; cursor: pointer;
+      color: var(--text); font-family: var(--font);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-wrap">
+    <div class="form-header">
+      <h1><i class="ti ti-home" aria-hidden="true"></i>Honey House log</h1>
+      <p>Daily activity &amp; usage tracker</p>
+    </div>
+
+    <div id="form-body">
+      <div class="field">
+        <label for="entry-date"><i class="ti ti-calendar" aria-hidden="true" style="font-size:13px; margin-right:3px;"></i>Date</label>
+        <input type="date" id="entry-date" />
+      </div>
+
+      <div class="field">
+        <label for="day-type"><i class="ti ti-tag" aria-hidden="true" style="font-size:13px; margin-right:3px;"></i>Type of day</label>
+        <select id="day-type">
+          <option value="" disabled selected>Select one...</option>
+          <option value="Paying guest">Paying guest</option>
+          <option value="Personal use">Personal use</option>
+          <option value="Personal use & paying guest">Personal use &amp; paying guest</option>
+          <option value="Owner work day">Owner work day</option>
+          <option value="Vacant">Vacant</option>
+        </select>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="person-card">
+        <div class="person-name"><i class="ti ti-user" aria-hidden="true"></i> Alex</div>
+        <div class="card-field">
+          <label for="alex-hours">Hours spent</label>
+          <input type="number" id="alex-hours" min="0" max="24" step="0.5" placeholder="0" inputmode="decimal" />
+        </div>
+        <div class="card-field">
+          <label for="alex-desc">Activities</label>
+          <textarea id="alex-desc" placeholder="Describe what you worked on..."></textarea>
+        </div>
+      </div>
+
+      <div class="person-card">
+        <div class="person-name"><i class="ti ti-user" aria-hidden="true"></i> Judy</div>
+        <div class="card-field">
+          <label for="judy-hours">Hours spent</label>
+          <input type="number" id="judy-hours" min="0" max="24" step="0.5" placeholder="0" inputmode="decimal" />
+        </div>
+        <div class="card-field">
+          <label for="judy-desc">Activities</label>
+          <textarea id="judy-desc" placeholder="Describe what Judy worked on..."></textarea>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" type="button">
+        <div class="spinner" id="spinner"></div>
+        <i class="ti ti-send" aria-hidden="true" id="send-icon" style="font-size:15px;"></i>
+        <span id="btn-label">Submit entry</span>
+      </button>
+
+      <div class="status-banner" id="status-banner"></div>
+    </div>
+
+    <div class="success-msg" id="success-msg">
+      <i class="ti ti-circle-check" style="font-size:52px; color:#2ecc71;"></i>
+      <h2>Entry logged</h2>
+      <p id="success-detail"></p>
+      <button class="another-btn" id="another-btn" type="button">Log another day</button>
+    </div>
+  </div>
+
+  <script>
+    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhqJCRq_9Bp3CQrVPitF4pAQaQd1NXIhQ8M0Q4Jo-kZ3AJ1vukpCsiBOq8loSGw6Zi/exec";
+
+    // Set today's date
+    (function() {
+      var t = new Date();
+      var yyyy = t.getFullYear();
+      var mm = String(t.getMonth() + 1).padStart(2, '0');
+      var dd = String(t.getDate()).padStart(2, '0');
+      document.getElementById('entry-date').value = yyyy + '-' + mm + '-' + dd;
+    })();
+
+    // Scroll field into view when keyboard opens (Android)
+    var activeField = null;
+    document.querySelectorAll('input, select, textarea').forEach(function(el) {
+      el.addEventListener('focus', function() {
+        activeField = el;
+        setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 500);
+      });
+      el.addEventListener('blur', function() { activeField = null; });
+    });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function() {
+        if (activeField) {
+          setTimeout(function() { activeField.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+        }
+      });
+    }
+
+    function showStatus(msg, type) {
+      var b = document.getElementById('status-banner');
+      b.textContent = msg;
+      b.className = 'status-banner ' + type;
+    }
+
+    function setLoading(loading) {
+      var btn = document.getElementById('submit-btn');
+      btn.disabled = loading;
+      document.getElementById('spinner').style.display = loading ? 'block' : 'none';
+      document.getElementById('send-icon').style.display = loading ? 'none' : 'inline';
+      document.getElementById('btn-label').textContent = loading ? 'Saving...' : 'Submit entry';
+    }
+
+    function doSubmit(payload) {
+      showStatus('Sending to Google Sheets...', 'info');
+      setLoading(true);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', SCRIPT_URL, true);
+      xhr.setRequestHeader('Content-Type', 'text/plain'); // text/plain avoids preflight on Android
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          // With no-cors we won't get a real status, treat any completion as success
+          document.getElementById('form-body').style.display = 'none';
+          document.getElementById('success-msg').style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.getElementById('success-detail').textContent =
+            payload.date + ' \u00b7 ' + payload.dayType +
+            ' \u00b7 Alex ' + payload.alexHours + 'h' +
+            ' \u00b7 Judy ' + payload.judyHours + 'h';
+        }
+      };
+
+      xhr.onerror = function() {
+        setLoading(false);
+        showStatus('Network error. Check your connection and try again.', 'error');
+      };
+
+      xhr.send(JSON.stringify(payload));
+    }
+
+    document.getElementById('submit-btn').addEventListener('click', function() {
+      var date = document.getElementById('entry-date').value;
+      var dayType = document.getElementById('day-type').value;
+
+      if (!date || !dayType) {
+        alert('Please fill in the date and type of day.');
+        return;
+      }
+
+      doSubmit({
+        date: date,
+        dayType: dayType,
+        alexHours: document.getElementById('alex-hours').value || '0',
+        alexDesc: document.getElementById('alex-desc').value,
+        judyHours: document.getElementById('judy-hours').value || '0',
+        judyDesc: document.getElementById('judy-desc').value
+      });
+    });
+
+    document.getElementById('another-btn').addEventListener('click', function() {
+      document.getElementById('day-type').value = '';
+      document.getElementById('alex-hours').value = '';
+      document.getElementById('alex-desc').value = '';
+      document.getElementById('judy-hours').value = '';
+      document.getElementById('judy-desc').value = '';
+      document.getElementById('status-banner').className = 'status-banner';
+
+      var t = new Date();
+      var yyyy = t.getFullYear();
+      var mm = String(t.getMonth() + 1).padStart(2, '0');
+      var dd = String(t.getDate()).padStart(2, '0');
+      document.getElementById('entry-date').value = yyyy + '-' + mm + '-' + dd;
+
+      setLoading(false);
+      document.getElementById('form-body').style.display = 'block';
+      document.getElementById('success-msg').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
