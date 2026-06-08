@@ -284,7 +284,7 @@
 </div>
 
 <script>
-  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjZULeQW8muleDnCjOOUlqEoG0aNJijvuVjgrROI-hVQeAQ24vydSAHkz0jTea-zDc/exec";
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq5mIBDWV4mdsd4BEqUDdi8cMrp_LFVlIccW1ttz16aTZw1hoYOznS9amXj_wTnVMW/exec";
 
   var currentMode = "manual";
   var stoppingSession = null;
@@ -427,20 +427,25 @@
 
   // Load open sessions from sheet
   function loadOpenSessions() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', SCRIPT_URL, true);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        try {
-          var data = JSON.parse(xhr.responseText);
-          if (data.result === 'success') {
-            openSessions = data.openSessions || [];
-            renderOpenSessions();
-          }
-        } catch(e) {}
+    // Use JSONP to avoid CORS issues when hosted on GitHub Pages
+    var callbackName = 'hhCallback_' + Date.now();
+    window[callbackName] = function(data) {
+      if (data.result === 'success') {
+        openSessions = data.openSessions || [];
+        renderOpenSessions();
       }
+      // Clean up
+      delete window[callbackName];
+      var el = document.getElementById(callbackName);
+      if (el) el.parentNode.removeChild(el);
     };
-    xhr.send();
+    var script = document.createElement('script');
+    script.id = callbackName;
+    script.src = SCRIPT_URL + '?callback=' + callbackName;
+    script.onerror = function() {
+      delete window[callbackName];
+    };
+    document.body.appendChild(script);
   }
 
   // Send via XHR
